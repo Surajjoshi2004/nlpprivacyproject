@@ -2,32 +2,37 @@ import sys
 import json
 from presidio_analyzer import AnalyzerEngine
 
-def detect_pii(text):
-    """Find all names, locations, phones, emails in text"""
-    analyzer = AnalyzerEngine()
-    
-    # Detect entities
-    results = analyzer.analyze(
-        text=text,
-        language='en',
-        entities=["PERSON", "LOCATION", "PHONE_NUMBER", "EMAIL_ADDRESS"]
-    )
-    
-    # Convert to simple format
-    entities = []
-    for result in results:
-        entities.append({
-            "type": result.entity_type,
-            "text": text[result.start:result.end],
-            "start": result.start,
-            "end": result.end,
-            "score": result.score
-        })
-    
-    return entities
+ENTITIES = ["PERSON", "LOCATION", "PHONE_NUMBER", "EMAIL_ADDRESS"]
+
+_analyzer: AnalyzerEngine | None = None
+
+def get_analyzer() -> AnalyzerEngine:
+    """Return a module-level singleton to avoid re-initializing on every call."""
+    global _analyzer
+    if _analyzer is None:
+        _analyzer = AnalyzerEngine()
+    return _analyzer
+
+
+def detect_pii(text: str) -> list[dict]:
+    """Detect names, locations, phone numbers, and email addresses in text."""
+    results = get_analyzer().analyze(text=text, language="en", entities=ENTITIES)
+    return [
+        {
+            "type": r.entity_type,
+            "text": text[r.start:r.end],
+            "start": r.start,
+            "end": r.end,
+            "score": round(r.score, 4),
+        }
+        for r in results
+    ]
+
 
 if __name__ == "__main__":
-    text = sys.argv[1]
-    entities = detect_pii(text)
-    print(json.dumps({"entities": entities}))
+    if len(sys.argv) < 2:
+        print(json.dumps({"error": "Usage: detector.py <text>"}))
+        sys.exit(1)
 
+    entities = detect_pii(sys.argv[1])
+    print(json.dumps({"entities": entities}))
