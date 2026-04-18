@@ -3,6 +3,7 @@ import json
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
+ENTITIES = ["PERSON", "LOCATION", "PHONE_NUMBER", "EMAIL_ADDRESS"]
 FAKE_NAMES = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Sam", "Jamie"]
 FAKE_LOCATIONS = ["City_A", "City_B", "City_C", "Town_X", "Town_Y"]
 
@@ -10,20 +11,31 @@ PERSON_TYPES = {"PERSON", "PER"}
 LOCATION_TYPES = {"LOCATION", "LOC", "GPE"}
 
 
+def get_results(text: str) -> list:
+    """Return non-overlapping analyzer results limited to supported entities."""
+    analyzer = AnalyzerEngine()
+    results = analyzer.analyze(text=text, language="en", entities=ENTITIES)
+
+    filtered_results = []
+    last_start = len(text)
+    for result in sorted(results, key=lambda item: (item.start, item.end), reverse=True):
+        if result.end <= last_start:
+            filtered_results.append(result)
+            last_start = result.start
+
+    return filtered_results
+
+
 def method_tags(text: str) -> str:
     """Replace entities with typed tags like <PERSON_1>."""
-    analyzer = AnalyzerEngine()
     anonymizer = AnonymizerEngine()
-    results = analyzer.analyze(text=text, language="en")
+    results = get_results(text)
     return anonymizer.anonymize(text=text, analyzer_results=results).text
 
 
 def method_surrogate(text: str) -> str:
     """Replace entities with realistic fake names and locations."""
-    analyzer = AnalyzerEngine()
-    results = analyzer.analyze(text=text, language="en")
-
-    results_sorted = sorted(results, key=lambda x: x.start, reverse=True)
+    results_sorted = get_results(text)
 
     anonymized_text = text
     entity_map: dict[str, str] = {}

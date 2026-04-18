@@ -1,1 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap");
 @import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --bg: #f4efe4;
+  --bg-accent: #d7e8d4;
+  --surface: rgba(255, 252, 247, 0.88);
+  --surface-strong: #fffdf8;
+  --surface-muted: #f1ebdd;
+  --border: rgba(39, 46, 27, 0.12);
+  --border-strong: rgba(39, 46, 27, 0.22);
+  --text: #1f2418;
+  --text-muted: #56604a;
+  --primary: #2f5d50;
+  --primary-strong: #23483e;
+  --accent: #cb5c2d;
+  --accent-soft: rgba(203, 92, 45, 0.14);
+  --success: #356a41;
+  --danger: #923d2b;
+  --shadow: 0 24px 80px rgba(49, 54, 37, 0.12);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: "Space Grotesk", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(203, 92, 45, 0.14), transparent 28%),
+    radial-gradient(circle at top right, rgba(47, 93, 80, 0.18), transparent 32%),
+    linear-gradient(180deg, var(--bg) 0%, #ebe4d5 100%);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
